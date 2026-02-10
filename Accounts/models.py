@@ -16,6 +16,9 @@ class AccountModel(models.Model):
     current_balance = models.DecimalField(max_digits=12, decimal_places=2)
     is_active = models.BooleanField(default=True)
     currency = models.ForeignKey(CurrencyModel, on_delete=models.PROTECT)
+    
+    def __str__(self):
+        return f"{self.name} ({self.user})"
 
     class Meta:
         unique_together = ("user", "name")

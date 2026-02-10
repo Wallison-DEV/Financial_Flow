@@ -6,11 +6,11 @@ class CurrencyModel(models.Model):
 
     code = models.CharField(max_length=3, unique=True) #BRL, USD, EUR
     name = models.CharField(max_length=50)
-    simbol = models.CharField(max_length=5)
+    symbol = models.CharField(max_length=5)
 
     is_base= models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.code
+        return f"{self.code} — {self.name} ({self.symbol})"
