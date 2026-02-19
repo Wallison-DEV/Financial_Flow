@@ -12,6 +12,10 @@ class AccountViewSet(viewsets.ModelViewSet):
     serializer_class = AccountSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['name']
+    filterset_fields = ['type', 'is_active']
+
     def get_queryset(self):
         return AccountModel.objects.filter(user=self.request.user)
     
@@ -21,6 +25,9 @@ class AccountViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['type']
 
     def get_queryset(self):
         return CategoryModel.objects.filter(user=self.request.user).order_by('name')
@@ -60,6 +67,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class TransferViewSet(viewsets.ModelViewSet):
     serializer_class = TransferSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = {
+        'date': ['gte', 'lte'], # gte = Greater Than or Equal | lte = Less Than or Equal
+        'source_account': ['exact'],
+        'destination_account': ['exact'],
+    }
 
     def get_queryset(self):
         return TransferModel.objects.filter(source_account__user=self.request.user)

@@ -37,6 +37,9 @@ class TransactionSerlializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
+        if isinstance(instance, dict):
+            return super().to_representation(instance
+                                             )
         repr = super().to_representation(instance)
         repr['user'] = instance.account.user.username
         repr['original_currency'] = instance.original_currency.name
