@@ -7,6 +7,7 @@ from .models import AccountModel, CategoryModel, TransactionModel, TransferModel
 @transaction.atomic
 def create_transaction(data):
     account = data["account"]
+    credit_card = data.get("credit_card")
     amount = Decimal(data["original_amount"])
     tx_type = data["type"]
 
@@ -14,15 +15,17 @@ def create_transaction(data):
 
     converted = convert(amount, original_currency, account.currency)
 
-    if tx_type == "OUT":
-        account.current_balance -= converted
-    else:
-        account.current_balance += converted
+    if not credit_card:
+        if tx_type == "OUT":
+            account.current_balance -= converted
+        else:
+            account.current_balance += converted
 
-    account.save(update_fields=["current_balance"])
+        account.save(update_fields=["current_balance"])
 
-    return TransactionModel.objects.create(
+    transaction = TransactionModel.objects.create(
         account=account,
+        credit_card=credit_card,
         category=data["category"],
         original_amount=amount,
         original_currency=original_currency,
@@ -33,6 +36,14 @@ def create_transaction(data):
         type=tx_type,
         is_recurring=data.get("is_recurring", False),
     )
+    if credit_card:
+        from CreditCard.services import get_or_create_invoice
+        invoice = get_or_create_invoice(credit_card, transaction.date)
+        invoice.transactions.add(transaction)
+        invoice.total_amount += transaction.converted_amount
+        invoice.save()
+    
+    return transaction
 
 @transaction.atomic
 def create_transfer(data):

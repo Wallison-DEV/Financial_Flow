@@ -46,6 +46,12 @@ class TransactionModel(models.Model):
         CANCELED = "CANCELED", _("Cancelada")
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     account = models.ForeignKey(AccountModel, on_delete=models.PROTECT)
+    credit_card = models.ForeignKey(
+        'CreditCard.CreditCardModel', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
     category = models.ForeignKey(CategoryModel, on_delete=models.PROTECT)
     original_amount = models.DecimalField(max_digits=12, decimal_places=2)
     original_currency = models.ForeignKey(CurrencyModel, on_delete=models.PROTECT)
