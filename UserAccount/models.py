@@ -1,8 +1,10 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from currencies.models import CurrencyModel
 
 class UserModel(AbstractUser):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
 
     groups = models.ManyToManyField(
@@ -31,6 +33,7 @@ def user_directory_path(instance, filename):
     return "user_{0}/{1}".format(instance.user.id, filename)
 
 class ProfileModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
 
     default_currency = models.ForeignKey(

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -8,7 +9,7 @@ class AccountModel(models.Model):
     class ACCOUNT_TYPE_CHOICES(models.TextChoices):
         CHECKING_ACCOUNT ="CC", _("Conta corrente")
         SAVINGS_ACCOUNT ="CP", _("Conta poupança")
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     type = models.CharField(max_length=2, choices=ACCOUNT_TYPE_CHOICES.choices)
@@ -23,26 +24,11 @@ class AccountModel(models.Model):
     class Meta:
         unique_together = ("user", "name")
 
-class TransferModel(models.Model):
-    source_account= models.ForeignKey(AccountModel, related_name="outgoing", on_delete=models.PROTECT)
-    destination_account = models.ForeignKey(AccountModel, related_name="incoming", on_delete=models.PROTECT)
-    date = models.DateTimeField()
-    original_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    original_currency = models.ForeignKey(CurrencyModel, on_delete=models.PROTECT)
-    destination_currency = models.ForeignKey(
-        CurrencyModel,
-        on_delete=models.PROTECT,
-        related_name="transfer_destination_currency"
-    )
-    converted_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
 class CategoryModel(models.Model):
     class CATEGORY_TYPE_CHOICES(models.TextChoices):
         IN = "IN", _("Entrada")
         OUT = "OUT", _("Saída")
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     name = models.CharField(max_length=20)
     type = models.CharField(max_length=3, choices=CATEGORY_TYPE_CHOICES.choices, default=CATEGORY_TYPE_CHOICES.IN)
@@ -58,7 +44,7 @@ class TransactionModel(models.Model):
         COMPLETE = "COMPLETE", _("Completa")
         PENDING = "PENDING", _("Pendente")
         CANCELED = "CANCELED", _("Cancelada")
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     account = models.ForeignKey(AccountModel, on_delete=models.PROTECT)
     category = models.ForeignKey(CategoryModel, on_delete=models.PROTECT)
     original_amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -69,5 +55,21 @@ class TransactionModel(models.Model):
     description = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=3, choices=CategoryModel.CATEGORY_TYPE_CHOICES.choices)
     is_recurring = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class TransferModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    source_account= models.ForeignKey(AccountModel, related_name="outgoing", on_delete=models.PROTECT)
+    destination_account = models.ForeignKey(AccountModel, related_name="incoming", on_delete=models.PROTECT)
+    date = models.DateTimeField()
+    original_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    original_currency = models.ForeignKey(CurrencyModel, on_delete=models.PROTECT)
+    destination_currency = models.ForeignKey(
+        CurrencyModel,
+        on_delete=models.PROTECT,
+        related_name="transfer_destination_currency"
+    )
+    converted_amount = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

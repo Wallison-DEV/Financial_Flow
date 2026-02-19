@@ -1,4 +1,45 @@
-.venv/
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
 *.pyc
+*.pyo
+*.sqlite3
+
+# Ignore database files
+db.sqlite3
+db.sqlite3-journal
+
+# Ignore environment and other config files
+env/
+venv/
+.venv
 .env
+*.env
+
+# Ignore cache files and directories
+*.cache
+*.gz
+*.swp
+.pytest_cache/
+.mypy_cache/
+coverage/
+
+# Ignore static and media files (if not required in the repo)
+staticfiles/
+media/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE project files
+.idea/
+.vscode/
+
+# Ignore Django migrations
+**/migrations/__pycache__/

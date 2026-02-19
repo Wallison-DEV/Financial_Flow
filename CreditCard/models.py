@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -5,6 +6,7 @@ from Accounts.models import AccountModel, TransactionModel
 from currencies.models import CurrencyModel
 
 class CreditCardModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     account = models.ForeignKey(AccountModel, on_delete=models.PROTECT)
     brand = models.CharField(max_length=20)
     limit = models.DecimalField(max_digits=10, decimal_places=2)
@@ -21,6 +23,7 @@ class InvoiceModel(models.Model):
         PAID = "PAID", _("Paga")
         PARTIAL = "PARTIAL", _("Parcialmente paga")
         CANCELED = "CANCELED", _("Cancelada")
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     credit_card = models.ForeignKey(CreditCardModel, on_delete=models.PROTECT)
     transactions = models.ManyToManyField(TransactionModel, related_name="invoices")
     month = models.IntegerField()
