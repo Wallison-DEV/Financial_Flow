@@ -65,7 +65,7 @@ class BudgetSerializer(serializers.ModelSerializer):
 
         total_budgets = BudgetModel.objects.filter(
             user=user, month=obj.month, year=obj.year
-        ).aggregate(Sum('amount_limit'))['amount_limit_sum'] or 0
+        ).aggregate(Sum('amount_limit'))['amount_limit__sum'] or 0
 
         available_after_goals = income - goal_burden
 

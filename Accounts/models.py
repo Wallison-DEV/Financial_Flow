@@ -51,11 +51,12 @@ class TransactionModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     account = models.ForeignKey(AccountModel, on_delete=models.PROTECT)
     credit_card = models.ForeignKey(
-        'CreditCard.CreditCardModel', 
+        "CreditCard.CreditCardModel", 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True
     )
+    installments = models.IntegerField(default=1, verbose_name="Número de Parcelas")
     category = models.ForeignKey(CategoryModel, on_delete=models.PROTECT)
     original_amount = models.DecimalField(max_digits=12, decimal_places=2)
     original_currency = models.ForeignKey(CurrencyModel, on_delete=models.PROTECT)
@@ -64,9 +65,42 @@ class TransactionModel(models.Model):
     date = models.DateTimeField()
     description = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=3, choices=CategoryModel.CATEGORY_TYPE_CHOICES.choices)
-    is_recurring = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+class RecurringTransactionModel(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    account = models.ForeignKey(AccountModel, on_delete=models.PROTECT)
+    credit_card = models.ForeignKey("CreditCard.CreditCardModel", on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(CategoryModel, on_delete=models.PROTECT)
+
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.ForeignKey(CurrencyModel, on_delete=models.PROTECT)
+
+    type = models.CharField(max_length=3, choices=CategoryModel.CATEGORY_TYPE_CHOICES.choices)
+
+    frequency = models.CharField(
+        max_length=10,
+        choices=[
+            ("DAILY", "Diária"),
+            ("WEEKLY", "Semanal"),
+            ("MONTHLY", "Mensal"),
+            ("YEARLY", "Anual"),
+        ]
+    )
+
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    next_execution = models.DateField(null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if not self.next_execution:
+            self.next_execution = self.start_date
+        super().save(*args, **kwargs)
+
 
 class TransferModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

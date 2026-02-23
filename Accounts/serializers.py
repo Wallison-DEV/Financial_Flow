@@ -1,4 +1,4 @@
-from .models import AccountModel, CategoryModel, TransactionModel, TransferModel
+from .models import AccountModel, CategoryModel, RecurringTransactionModel, TransactionModel, TransferModel
 from rest_framework import serializers
 from django.db import IntegrityError
 
@@ -58,7 +58,25 @@ class TransactionSerlializer(serializers.ModelSerializer):
         if value.user != self.context['request'].user:
             raise serializers.ValidationError("Esta categoria não pertence a você.")
         return value
+    
+    def validate(self, data):
+        credit_card = data.get('credit_card')
+        installments = data.get('installments', 1)
+        category = data.get('category')
+        tx_type = data.get('type')
 
+        if category and tx_type and category.type != tx_type:
+            raise serializers.ValidationError(
+                {"type": "Tipo da transação deve corresponder ao tipo da categoria."}
+            )
+
+        if credit_card and installments < 1:
+            raise serializers.ValidationError(
+                {"installments": "Parcelamento inválido."}
+            )
+
+        return data
+    
 class TransferSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransferModel
@@ -70,3 +88,21 @@ class TransferSerializer(serializers.ModelSerializer):
         if data['source_account'].user != user or data['destination_account'].user != user:
             raise serializers.ValidationError("Ambas as contas devem pertencer ao seu usuário.")
         return data
+
+class RecurringTransactionSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = RecurringTransactionModel
+        fields = "__all__"
+        read_only_fields = ["next_execution"]
+
+    def validate_account(self, value):
+        if value.user != self.context["request"].user:
+            raise serializers.ValidationError("Conta não pertence ao usuário.")
+        return value
+
+    def validate_category(self, value):
+        if value.user != self.context["request"].user:
+            raise serializers.ValidationError("Categoria não pertence ao usuário.")
+        return value
