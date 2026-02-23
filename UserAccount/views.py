@@ -10,10 +10,12 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated(), IsOwner]
+        return [permissions.IsAuthenticated(), IsOwner()] 
 
     def get_queryset(self):
-        return UserModel.objects.filter(id=self.request.user.id)
+        if self.request.user.is_authenticated:
+            return UserModel.objects.filter(id=self.request.user.id)
+        return UserModel.objects.none()
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer

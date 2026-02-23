@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import transaction
 from Accounts.models import CategoryModel
 from Goals.models import BudgetModel
@@ -9,7 +10,7 @@ def setup_initial_user_data(user, monthly_income, currency):
     profile, created = ProfileModel.objects.get_or_create(
         user=user,
         defaults={
-            'monthly_income': monthly_income,
+            'monthly_income': Decimal(str(monthly_income)),
             'default_currency': currency
         }
     )
@@ -22,10 +23,10 @@ def setup_initial_user_data(user, monthly_income, currency):
         ("Salário Mensal", "IN", 1.0, "HIGH"),
     }
 
-    today = date.today
+    today = date.today()
 
     for name, cat_type, percent, priority in default_categories: 
-        limit = monthly_income * percent if cat_type == "OUT" else monthly_income
+        limit = (Decimal(str(monthly_income)) * Decimal(str(percent)) if cat_type == "OUT" else Decimal(str(monthly_income)))
 
         category = CategoryModel.objects.create(
             user=user,
@@ -43,4 +44,4 @@ def setup_initial_user_data(user, monthly_income, currency):
             year=today.year,
         )
 
-        return profile
+    return profile
