@@ -35,7 +35,10 @@ def user_directory_path(instance, filename):
 class ProfileModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(UserModel, on_delete=models.CASCADE)
-
+    monthly_income = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Renda mensal fixa utilizada para calcular sugestão de orçamentos"    
+    )
     default_currency = models.ForeignKey(
         CurrencyModel,
         on_delete=models.PROTECT,
