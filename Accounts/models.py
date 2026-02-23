@@ -26,16 +26,20 @@ class AccountModel(models.Model):
 
 class CategoryModel(models.Model):
     class CATEGORY_TYPE_CHOICES(models.TextChoices):
-        IN = "IN", _("Entrada")
-        OUT = "OUT", _("Saída")
+        IN = "IN", _("Entrada (Receitas)")
+        OUT = "OUT", _("Saída (Despesas)")
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     name = models.CharField(max_length=20)
     type = models.CharField(max_length=3, choices=CATEGORY_TYPE_CHOICES.choices, default=CATEGORY_TYPE_CHOICES.IN)
+
     parent = models.ForeignKey('self', null=True, blank=True, related_name="children", on_delete=models.PROTECT)
     icon = models.ImageField(upload_to="categories/", null=True, blank=True)
     color = models.CharField(max_length=7, null=True, blank=True) # Hexadecimal color code
     ordering = models.IntegerField(default=0) # Campo para definir a ordem das categorias
+
+    sugested_limit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
